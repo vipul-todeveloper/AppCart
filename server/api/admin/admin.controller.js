@@ -88,8 +88,15 @@ exports.insertData=function(req,res)
             });
         }
     });
+};
 
 
-}
+exports.LoginDetail=function(req,res){
 
+
+
+
+
+
+};
 
