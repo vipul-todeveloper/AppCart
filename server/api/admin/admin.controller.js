@@ -46,6 +46,19 @@ exports.index = function(req, res) {
     ]);
 };
 
+/*
+
+ * purpose : used to register admin
+ * Call:POST
+ * url:http://localhost:9000/api/admin
+ * input parameters : {firstname : "admin",user="admin",pass="admin",email="admin@admin.com"}
+ * output :
+ > success:
+ {IsSuccess:true,data:[],msg:""}
+ > Error :
+ {IsSuccess:false,msg:"",desc:""}
+
+ */
 exports.insertData=function(req,res)
 {
     console.log("Admin Insert");
@@ -54,7 +67,7 @@ exports.insertData=function(req,res)
     console.log(req.body);
 //console.log(req);
     console.log("bye");
-    var objuser = req.body;
+    var obj = req.body;
 
 //console.log(objuser.firstname);
     connectionPool.getConnection(function(err,connection){
@@ -67,7 +80,7 @@ exports.insertData=function(req,res)
         }
         else
         {
-            connection.query('INSERT INTO admin (firstname,user,pass,email) values (?,?,?,?)',[objuser.firstname,objuser.user,objuser.pass,objuser.email],function(err,result){
+            connection.query('INSERT INTO admin (firstname,user,pass,email) values (?,?,?,?)',[obj.firstname,obj.user,obj.pass,obj.email],function(err,result){
                 if(err)
                 {
                     console.log('Connection error :',err);
@@ -90,13 +103,225 @@ exports.insertData=function(req,res)
     });
 };
 
+/*
+* purpose : To check admin login successful or not
+* Call:POST
+* url : http://localhost:9000/api/admin/login
+* input parameters : {user="admin1",pass="admin1"}
+* output :
+    > success:
+     {IsSuccess:true,data:[{user="admin1",pass="admin1"}],msg:"Login Successful"}
+    > Error :
+     {IsSuccess:false,msg:"Not successful Login",desc:"Please Check username or password"}
+    > Error :
+    {IsSuccess:false,msg:"Not successful Login",desc:"Username and Password can not be empty.."}
+ */
 
-exports.LoginDetail=function(req,res){
+exports.loginDetail=function(req,res){
+
+  console.log("Login Detail.....");
+    console.log(req.body);
+    console.log("user :==>" +req.body.user);
+    console.log("pass:==>" +req.body.pass);
+
+    var username=req.body.user;
+    var password=req.body.pass;
+
+    console.log("Username :"+username);
+    console.log("Password :"+password);
+  connectionPool.getConnection(function(err,connection){
+
+     if(err)
+     {
+         console.log('Connection error:',err);
+         res.statusCode=503;
+         res.send({
+             'IsSuccess' : false, 'msg': err ,'desc':'Connection Error'+err
+         });
+     }
+      else
+     {
+         if(username != "" && password !== "")
+         {
+             connection.query('SELECT user,pass FROM admin WHERE user = ? and pass = ? ',[username,password],function(err,result){
+                 console.log("Result :==>"+result);
+
+                 if(err)
+                 {
+                     console.log('Connection error :',err);
+                     res.statusCode=500;
+                     res.send({
+                         'IsSuccess' : false, 'msg': err , desc:'Database Error :==>'+err
+                     });
+                 }
+                 else
+                 {
+                     console.log("Result:==>"+result.length);
+                     if(result.length != 0)
+                     {
+                         console.log(' Login Successfully');
+                         res.send({
+                             'IsSuccess' : true, 'data': result ,'msg':' Login Successful....'
+                         });
+                     }
+                     else
+                     {
+                         console.log("Not Successful Login.....");
+                         res.send({
+                             'IsSuccess' : false, 'msg': 'Login Not Successful' , desc:'Please Check Username or  Password'
+                         });
+                     }
+                 }
+             });
+         }
+         else
+         {
+             res.send({
+                 'IsSuccess': false, 'msg':'Login Unsuccessful' , 'desc': 'Username and Password Should not be empty'
+             });
+         }
+
+     }
+      connection.release();
+  });
+};
 
 
 
+/*
+
+ * purpose : To add category by admin
+ * Call:POST
+ * url:http://localhost:9000/api/admin/category
+ * input parameters : {cat_name : "Toys",createdate="2014-04-15",createdby="Rohit",Flag:"0" or "1"}("0" For Deactive or "1" for Active)
+ * output :
+ > success:
+ {IsSuccess:true,data:[],msg:""}
+ > Error :
+ {IsSuccess:false,msg:"",desc:""}
+
+ */
+exports.addCategory=function(req,res)
+{
+   console.log("Add Category......");
+    var obj = req.body;
+
+    connectionPool.getConnection(function(err,connection){
+        if(err){
+            console.log('Connection error:',err);
+            res.statusCode=503;
+            res.send({
+                'IsSuccess' : false, 'msg': err ,'desc':'Connection Error'+err
+            });
+        }
+        else
+        {
+            connection.query('INSERT INTO category (cat_name,createdby,createdate,flag) values (?,?,?,?)',[obj.cat_name,obj.createdby,obj.createdate,obj.flag],function(err,result){
+               console.log(JSON.stringify(result));
+                if(err)
+                {
+                    console.log('Connection error :',err);
+                    res.statusCode=500;
+                    res.send({
+                        'IsSuccess' : false, 'msg': err , desc:'Database Error :==>'+err
+                    });
+                }
+                else
+                {
+                    console.log('Successfully Inserted');
+                    res.send({
+                        'IsSuccess' : true, 'data': [] ,'msg':'Inserted successfully'
+                    });
+                }
+                connection.release();
+
+            });
+        }
+    });
+};
+
+exports.updateCategory=function(req,res){
+    console.log("Update Category.....");
+    var obj = req.body;
+    console.log(req.body);
+    var paramsData=req.params.id;
+    console.log(paramsData);
 
 
+    connectionPool.getConnection(function(err,connection){
+        if(err){
+            console.log('Connection error:',err);
+            res.statusCode=503;
+            res.send({
+                'IsSuccess' : false, 'msg': err ,'desc':'Connection Error'+err
+            });
+        }
+        else
+        {
+                connection.query('UPDATE category SET  cat_name =?,createdby = ?, createdate = ? WHERE cat_id= ?',[obj.cat_name,obj.createdby,obj.createdate,req.params.id],function(err,result){
+                    console.log(JSON.stringify(result));
+                    if(err)
+                    {
+                        console.log('Connection error :',err);
+                        res.statusCode=500;
+                        res.send({
+                            'IsSuccess' : false, 'msg': err , desc:'Database Error :==>'+err
+                        });
+                    }
+                    else
+                    {
+                        console.log('Successfully Updated');
+                        res.send({
+                            'IsSuccess' : true, 'data': [] ,'msg':'Successfully Updated'
+                        });
+                    }
+                    connection.release();
+
+                });
+        }
+    });
 
 };
 
+exports.deactiveCategory=function(req,res){
+    console.log("Deactivate Category.....");
+    var deactive = 0;
+    console.log(req.body);
+    var paramsData=req.params.id;
+    console.log(paramsData);
+
+
+    connectionPool.getConnection(function(err,connection){
+        if(err){
+            console.log('Connection error:',err);
+            res.statusCode=503;
+            res.send({
+                'IsSuccess' : false, 'msg': err ,'desc':'Connection Error'+err
+            });
+        }
+        else
+        {
+            connection.query('UPDATE category SET flag=?  WHERE cat_id= ?',[deactive,req.params.id],function(err,result){
+                console.log(JSON.stringify(result));
+                if(err)
+                {
+                    console.log('Connection error :',err);
+                    res.statusCode=500;
+                    res.send({
+                        'IsSuccess' : false, 'msg': err , desc:'Database Error :==>'+err
+                    });
+                }
+                else
+                {
+                    console.log('Successfully Deactivate');
+                    res.send({
+                        'IsSuccess' : true, 'data': [] ,'msg':'Successfully Deactivate'
+                    });
+                }
+                connection.release();
+
+            });
+        }
+    });
+
+};
