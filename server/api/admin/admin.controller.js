@@ -14,6 +14,7 @@
 
 var _ = require('lodash');
 var mysql= require("mysql");
+var btoa = require('btoa')
 
 var connectionPool=mysql.createPool({
     host:'localhost',
@@ -126,6 +127,8 @@ exports.loginDetail=function(req,res){
 
     var username=req.body.user;
     var password=req.body.pass;
+    var url= req.url;
+    console.log("URL:=>"+url);
 
     console.log("Username :"+username);
     console.log("Password :"+password);
@@ -143,8 +146,18 @@ exports.loginDetail=function(req,res){
      {
          if(username != "" && password !== "")
          {
-             connection.query('SELECT user,pass FROM admin WHERE user = ? and pass = ? ',[username,password],function(err,result){
-                 console.log("Result :==>"+result);
+             connection.query('SELECT admin_id , user,pass FROM admin WHERE user = ? and pass = ? ',[username,password],function(err,result){
+                 var id=result[0].admin_id;
+                 var token=result[0].user;
+                 console.log("Token:==>"+token);
+
+                 var apiToken=btoa(token);
+                 console.log("API Token:==>"+apiToken);
+                   var d=new Date();
+                   var ms= Date.parse(d);
+                  console.log("API Token:==>"+(apiToken+ms));
+                   var period= d.getHours() +":"+ d.getMinutes() +":"+ d.getSeconds();
+                 console.log("Period"+period);
 
                  if(err)
                  {
@@ -160,10 +173,24 @@ exports.loginDetail=function(req,res){
                      if(result.length != 0)
                      {
                          console.log(' Login Successfully');
-                         res.send({
-                             'IsSuccess' : true, 'data': result ,'msg':' Login Successful....'
+
+                         connection.query('INSERT INTO temp (user_id,token,period) VALUES (?,?,?)',[id,(apiToken+ms),period],function(err,result){
+                           if(err)
+                           {
+                               res.send({
+                                   'IsSuccess' : false, 'msg': err , desc:'Database Error :==>'+err
+                               });
+                           }
+                           else
+                           {
+                               res.send({
+                                   'IsSuccess' : true, 'token': (apiToken+ms) ,'msg':' Login Successful....'
+                               });
+
+                           }
                          });
-                     }
+
+                          }
                      else
                      {
                          console.log("Not Successful Login.....");
@@ -204,7 +231,10 @@ exports.loginDetail=function(req,res){
 exports.addCategory=function(req,res)
 {
    console.log("Add Category......");
+
     var obj = req.body;
+    var checkToken = req.body.token;
+    exports.manageSession(checkToken);
 
     connectionPool.getConnection(function(err,connection){
         if(err){
@@ -234,7 +264,6 @@ exports.addCategory=function(req,res)
                     });
                 }
                 connection.release();
-
             });
         }
     });
@@ -276,7 +305,6 @@ exports.updateCategory=function(req,res){
                         });
                     }
                     connection.release();
-
                 });
         }
     });
@@ -285,43 +313,89 @@ exports.updateCategory=function(req,res){
 
 exports.deactiveCategory=function(req,res){
     console.log("Deactivate Category.....");
-    var deactive = 0;
-    console.log(req.body);
+
+
+
     var paramsData=req.params.id;
     console.log(paramsData);
 
-
     connectionPool.getConnection(function(err,connection){
-        if(err){
-            console.log('Connection error:',err);
-            res.statusCode=503;
-            res.send({
-                'IsSuccess' : false, 'msg': err ,'desc':'Connection Error'+err
-            });
-        }
-        else
-        {
-            connection.query('UPDATE category SET flag=?  WHERE cat_id= ?',[deactive,req.params.id],function(err,result){
-                console.log(JSON.stringify(result));
-                if(err)
-                {
-                    console.log('Connection error :',err);
-                    res.statusCode=500;
-                    res.send({
-                        'IsSuccess' : false, 'msg': err , desc:'Database Error :==>'+err
-                    });
-                }
-                else
-                {
-                    console.log('Successfully Deactivate');
-                    res.send({
-                        'IsSuccess' : true, 'data': [] ,'msg':'Successfully Deactivate'
-                    });
-                }
-                connection.release();
+       if(err)
+       {
+           console.log('Connection error:',err);
+           res.statusCode=503;
+           res.send({
+               'IsSuccess' : false, 'msg': err ,'desc':'Connection Error'+err
+           });
+       }
+       else
+       {
+         connection.query('SELECT flag FROM category WHERE cat_id= ? ',paramsData,function(err,result){
+             if(err)
+             {
+                 console.log('Connection error :',err);
+                 res.statusCode=500;
+                 res.send({
+                     'IsSuccess' : false, 'msg': err , desc:'Database Error :==>'+err
+                 });
+             }
+             else
+             {
+                 console.log("Result:==>"+result.length);
+                 console.log(JSON.stringify(result));
 
-            });
-        }
+
+                 if(result.length != 0)
+                 {
+                     console.log('Some Data found');
+                     res.send({
+                         'IsSuccess' : true, 'data': result ,'msg':'Some Data Found....'
+                     });
+                 }
+                 else
+                 {
+                     console.log("Not Data Found.....");
+                     res.send({
+                         'IsSuccess' : false, 'msg': 'Not Data Found.....' , desc:'Not Data Found.....'
+                     });
+                 }
+             }
+         });
+       }
     });
+};
 
+exports.manageSession=function(token)
+{
+    console.log("Manage Session.....");
+  connectionPool.getConnection(function(err,connection){
+     if(err)
+     {
+         console.log('Connection error:',err);
+         res.statusCode=503;
+         res.send({
+             'IsSuccess' : false, 'msg': err ,'desc':'Connection Error'+err
+         });
+     }
+     else
+     {
+         console.log("Else part of Manage Session");
+         connection.query('SELECT period from temp WHERE token = ?',[token],function(err,result){
+             console.log(JSON.stringify(result));
+             if(err)
+             {
+                 console.log('Connection error :',err);
+
+             }
+             else
+             {
+                 console.log("Successful");
+
+
+             }
+
+
+         });
+     }
+  });
 };
