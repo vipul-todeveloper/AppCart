@@ -15,6 +15,7 @@
 var _ = require('lodash');
 var mysql = require("mysql");
 var btoa = require('btoa');
+var expressValidator = require('express-validator');
 
 
 var connectionPool = mysql.createPool({
@@ -510,8 +511,6 @@ var fnDatabaseAddProduct=function(req,res){
                        connection.release();
                    });
                }
-
-
            });
 
        }
