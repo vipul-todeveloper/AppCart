@@ -15,7 +15,8 @@
 var _ = require('lodash');
 var mysql = require("mysql");
 var btoa = require('btoa');
-var expressValidator = require('express-validator');
+
+var dao = require('./admin.dao');
 
 
 var connectionPool = mysql.createPool({
@@ -304,54 +305,6 @@ exports.updateProduct=function(req,res){
     console.log("Database Update Product");
 };
 
-var fnDatabaseAddCategory = function (req, res) {
-    var obj = req.body;
-    var checkToken = req.body.token;
-    console.log("inside add category");
-    connectionPool.getConnection(function (err, connection) {
-        if (err) {
-            console.log('Connection error:', err);
-            res.statusCode = 503;
-            res.send({
-                'IsSuccess': false, 'msg': err, 'desc': 'Connection Error' + err
-            });
-        }
-        else {
-            connection.query('SELECT user_id FROM temp WHERE token= ?',[req.body.token],function(err,result){
-
-              //  console.log(JSON.stringify(result));
-                console.log(result[0].user_id);
-                if (err) {
-                    console.log('Connection error :', err);
-                }
-                else {
-                  //  console.log('find User Id from here');
-                    connection.query('INSERT INTO category (cat_name,createdby,createdate,flag) values (?,?,?,?)', [obj.cat_name, result[0].user_id, obj.createdate, obj.flag], function (err, result) {
-                        console.log(JSON.stringify(result));
-                        if (err) {
-                            console.log('Connection error :', err);
-                            res.statusCode = 500;
-                            res.send({
-                                'IsSuccess': false, 'msg': err, desc: 'Database Error :==>' + err
-                            });
-                        }
-                        else {
-                            console.log('Successfully Inserted');
-                            res.send({
-                                'IsSuccess': true, 'data': [], 'msg': 'Inserted successfully'
-                            });
-                        }
-                        connection.release();
-                    });
-
-                }
-
-
-            });
-
-        }
-    });
-};
 
 var fnDatabaseUpdateCategory = function (req, res) {
     console.log("Update Category.....");
