@@ -309,7 +309,7 @@ exports.logout = function (req, res) {
                             res.send({
                                 'IsSuccess': true, 'data': [], 'msg': 'Logout...'
                             });
-                           
+
 
                         }
                     });
