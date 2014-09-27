@@ -151,7 +151,7 @@ exports.loginDetail = function (req, res) {
                    }
                    else
                    {
-                       var admin_id=result.length;
+                       var admin_id=result[0].admin_id;
                        console.log("admin_id:==>"+admin_id);
                         if(result[0] && result[0].admin_id && result[0].admin_id != null)
                         {
@@ -180,12 +180,14 @@ exports.loginDetail = function (req, res) {
 
                                         var d = new Date();
                                         var ms = Date.parse(d);
-                                        var apiToken= btoa(username+ms);
-                                        console.log("API Token:==>"+apiToken);
+                                        var strToken= btoa(username+ms);
+                                        strToken = strToken.substring(0, strToken.length -2);
+                                        console.log("strToken:=>"+strToken);
+
                                         var period = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
                                         console.log("Period" + period);
 
-                                        connection.query('INSERT INTO temp (user_id,token,period) VALUES (?,?,?)',[admin_id,apiToken,period],function(err,result){
+                                        connection.query('INSERT INTO temp (user_id,token,period) VALUES (?,?,?)',[admin_id,strToken,period],function(err,result){
                                             if(err)
                                             {
                                                 console.log('Connection error :', err);
@@ -196,7 +198,7 @@ exports.loginDetail = function (req, res) {
                                             else{
                                                 console.log(' Token created');
                                                 res.send({
-                                                    'IsSuccess': true, 'token':apiToken, 'msg': 'Inserted successfully'
+                                                    'IsSuccess': true, 'token':strToken, 'msg': 'Inserted successfully'
                                                 });
                                             }
 
@@ -345,6 +347,20 @@ exports.updateProduct=function(req,res){
     console.log("Update Product......");
     manageSession(fnDatabaseUpdateProduct, req, res);
     console.log("Database Update Product");
+};
+
+
+
+exports.showCategory=function(req,res){
+    console.log("Show Category......");
+    manageSession(fnDataShowCategory, req, res);
+    console.log("Database Database Product");
+};
+
+exports.showOnCategory=function(req,res){
+    console.log("Show Category......");
+    manageSession(fnDataShowOnCategory, req, res);
+    console.log("Database Database Product");
 };
 
 
@@ -562,6 +578,7 @@ var fnDatabaseUpdateProduct=function(req,res){
       }
     });
 };
+
 var fnDatabaseAddCategory = function (req, res) {
     var obj = req.body;
     var checkToken = req.body.token;
@@ -672,3 +689,81 @@ var fnDatabaseProductStatus = function (req, res) {
         }
     });
 };
+
+var fnDataShowCategory=function(req,res)
+{
+ console.log("Show category...");
+    connectionPool.getConnection(function(err,connection){
+        if(err)
+        {
+            console.log('Connection error:', err);
+            res.statusCode = 503;
+            res.send({
+                'IsSuccess': false, 'msg': err, 'desc': 'Connection Error' + err
+            });
+        }
+        else
+        {
+            connection.query('SELECT cat_id,cat_name,flag FROM category',function(err,rows,fields){
+                if(err)
+                {
+                    console.log('Connection error :', err);
+                    res.send({
+                        'IsSuccess': false, 'msg': err, desc: 'Database Error :==>' + err
+                    });
+                }
+                else
+                {
+                    var query="SELECT cat_id,cat_name,flag FROM category";
+                    console.log("Select query :==>"+query);
+                    res.send({
+                        result: 'success',
+                        json:   rows,
+                        length: rows.length
+                    });
+                }
+            });
+        }
+
+
+    });
+};
+
+exports.fnDataShowOnCategory=function(req,res){
+    console.log("fnDataShowOnCategory");
+    console.log("Show category...");
+    connectionPool.getConnection(function(err,connection){
+        if(err)
+        {
+            console.log('Connection error:', err);
+            res.statusCode = 503;
+            res.send({
+                'IsSuccess': false, 'msg': err, 'desc': 'Connection Error' + err
+            });
+        }
+        else
+        {
+
+            connection.query('SELECT cat_id,cat_name FROM category WHERE flag = 1 ' ,function(err,result){
+                if(err)
+                {
+                    console.log('Connection error :', err);
+                    res.send({
+                        'IsSuccess': false, 'msg': err, desc: 'Database Error :==>' + err
+                    });                }
+                else
+                {
+                    var query="SELECT cat_id,cat_name,flag FROM category";
+                    console.log("Select query :==>"+query);
+                    res.send({
+                        'IsSuccess':true,
+                        json:   result,
+                        length: result.length
+                    });
+                }
+            });
+        }
+
+
+    });
+}
