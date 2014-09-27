@@ -151,58 +151,69 @@ exports.loginDetail = function (req, res) {
                    }
                    else
                    {
-                       var admin_id=result[0].admin_id;
+                       var admin_id=result.length;
                        console.log("admin_id:==>"+admin_id);
-                       connection.query('SELECT token FROM temp WHERE user_id= ?',[admin_id],function(err,result){
-                           if(err)
-                           {
-                               console.log('Connection error:', err);
-                               res.send({
-                                   'IsSuccess': false, 'msg': err, 'desc': 'Connection Error' + err
-                               });
+                        if(result[0] && result[0].admin_id && result[0].admin_id != null)
+                        {
+                            connection.query('SELECT token FROM temp WHERE user_id= ?',[admin_id],function(err,result){
+                                if(err)
+                                {
+                                    console.log('Connection error:', err);
+                                    res.send({
+                                        'IsSuccess': false, 'msg': err, 'desc': 'Connection Error' + err
+                                    });
 
-                           }
-                           else{
-                               console.log("Token:==>"+JSON.stringify(result));
-                               console.log("Token Check is the the testing portion");
-                              if(result[0] && result[0].token && result[0].token != null)
-                              {
-                                  console.log('Already Existing Token found');
-                                  res.send({
-                                      'IsSuccess': true, 'token':result[0].token , 'msg': 'Already Existing Token found'
-                                  });
-                              }
-                               else
-                              {
+                                }
+                                else{
+                                    console.log("Token:==>"+JSON.stringify(result));
+                                    console.log("Token Check is the the testing portion");
+                                    if(result[0] && result[0].token && result[0].token != null)
+                                    {
+                                        console.log('Already Existing Token found');
+                                        res.send({
+                                            'IsSuccess': true, 'token':result[0].token , 'msg': 'Already Existing Token found'
+                                        });
+                                    }
+                                    else
+                                    {
 
 
-                                  var d = new Date();
-                                  var ms = Date.parse(d);
-                                  var apiToken= btoa(username+ms);
-                                  console.log("API Token:==>"+apiToken);
-                                  var period = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-                                  console.log("Period" + period);
+                                        var d = new Date();
+                                        var ms = Date.parse(d);
+                                        var apiToken= btoa(username+ms);
+                                        console.log("API Token:==>"+apiToken);
+                                        var period = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+                                        console.log("Period" + period);
 
-                                  connection.query('INSERT INTO temp (user_id,token,period) VALUES (?,?,?)',[admin_id,apiToken,period],function(err,result){
-                                     if(err)
-                                     {
-                                         console.log('Connection error :', err);
-                                         res.send({
-                                             'IsSuccess': false, 'msg': err, desc: 'Database Error :==>' + err
-                                         });
-                                     }
-                                     else{
-                                         console.log(' Token created');
-                                         res.send({
-                                             'IsSuccess': true, 'token':apiToken, 'msg': 'Inserted successfully'
-                                         });
-                                     }
+                                        connection.query('INSERT INTO temp (user_id,token,period) VALUES (?,?,?)',[admin_id,apiToken,period],function(err,result){
+                                            if(err)
+                                            {
+                                                console.log('Connection error :', err);
+                                                res.send({
+                                                    'IsSuccess': false, 'msg': err, desc: 'Database Error :==>' + err
+                                                });
+                                            }
+                                            else{
+                                                console.log(' Token created');
+                                                res.send({
+                                                    'IsSuccess': true, 'token':apiToken, 'msg': 'Inserted successfully'
+                                                });
+                                            }
 
-                                  });
-                              }
-                           }
-                       });
+                                        });
+                                    }
+                                }
+                            });
 
+
+                        }
+                       else
+                        {
+                            res.send({
+                                'IsSuccess': false, 'msg': 'Please Check Username and Password', 'desc': 'Wrong Username and Password'
+                            });
+
+                        }
                    }
                });
            }
