@@ -99,7 +99,22 @@ var manageSession = function (callback, req, res) {
         }
     });
 };
-
+(function() {
+    Date.prototype.toYMD = Date_toYMD;
+    function Date_toYMD() {
+        var year, month, day;
+        year = String(this.getFullYear());
+        month = String(this.getMonth() + 1);
+        if (month.length == 1) {
+            month = "0" + month;
+        }
+        day = String(this.getDate());
+        if (day.length == 1) {
+            day = "0" + day;
+        }
+        return year + "-" + month + "-" + day;
+    }
+})();
 
 exports.loginDetail = function (req, res) {
     console.log("Login Detail.....");
@@ -124,62 +139,79 @@ exports.loginDetail = function (req, res) {
             });
         }
         else {
-            if (username != "" && password !== "") {
-                connection.query('SELECT admin_id, user,pass FROM admin WHERE user = ? and pass = ? ', [username, password], function (err, result) {
-                    var id = result[0].admin_id;
-                    var token = result[0].user;
-                    console.log("Token:==>" + token);
+           if(username != "" && password != "")
+           {
+               connection.query('SELECT admin_id,user,pass FROM admin WHERE user= ? and pass = ?',[username,password],function(err,result){
+                   if(err)
+                   {
+                       console.log('Connection error:', err);
+                       res.send({
+                           'IsSuccess': false, 'msg': err, 'desc': 'Connection Error' + err
+                       });
+                   }
+                   else
+                   {
+                       var admin_id=result[0].admin_id;
+                       console.log("admin_id:==>"+admin_id);
+                       connection.query('SELECT token FROM temp WHERE user_id= ?',[admin_id],function(err,result){
+                           if(err)
+                           {
+                               console.log('Connection error:', err);
+                               res.send({
+                                   'IsSuccess': false, 'msg': err, 'desc': 'Connection Error' + err
+                               });
 
-                    var apiToken = btoa(token);
-                    console.log("API Token:==>" + apiToken);
-                    var d = new Date();
-                    var ms = Date.parse(d);
-                    console.log("API Token:==>" + (apiToken + ms));
-                    var period = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-                    console.log("Period" + period);
+                           }
+                           else{
+                               console.log("Token:==>"+JSON.stringify(result));
+                               console.log("Token Check is the the testing portion");
+                              if(result[0] && result[0].token && result[0].token != null)
+                              {
+                                  console.log('Already Existing Token found');
+                                  res.send({
+                                      'IsSuccess': true, 'token':result[0].token , 'msg': 'Already Existing Token found'
+                                  });
+                              }
+                               else
+                              {
 
-                    if (err) {
-                        console.log('Connection error :', err);
-                        res.statusCode = 500;
-                        res.send({
-                            'IsSuccess': false, 'msg': err, desc: 'Database Error :==>' + err
-                        });
-                    }
-                    else {
-                        console.log("Result:==>" + result.length);
-                        if (result.length != 0) {
-                            console.log(' Login Successfully');
 
-                            connection.query('INSERT INTO temp (user_id,token,period) VALUES (?,?,?)', [id, (apiToken + ms), period], function (err, result) {
-                                if (err) {
-                                    res.send({
-                                        'IsSuccess': false, 'msg': err, desc: 'Database Error :==>' + err
-                                    });
-                                }
-                                else {
-                                    res.send({
-                                        'IsSuccess': true, 'token': (apiToken + ms), 'msg': ' Login Successful....'
-                                    });
+                                  var d = new Date();
+                                  var ms = Date.parse(d);
+                                  var apiToken= btoa(username+ms);
+                                  console.log("API Token:==>"+apiToken);
+                                  var period = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+                                  console.log("Period" + period);
 
-                                }
-                            });
+                                  connection.query('INSERT INTO temp (user_id,token,period) VALUES (?,?,?)',[admin_id,apiToken,period],function(err,result){
+                                     if(err)
+                                     {
+                                         console.log('Connection error :', err);
+                                         res.send({
+                                             'IsSuccess': false, 'msg': err, desc: 'Database Error :==>' + err
+                                         });
+                                     }
+                                     else{
+                                         console.log(' Token created');
+                                         res.send({
+                                             'IsSuccess': true, 'token':apiToken, 'msg': 'Inserted successfully'
+                                         });
+                                     }
 
-                        }
-                        else {
-                            console.log("Not Successful Login.....");
-                            res.send({
-                                'IsSuccess': false, 'msg': 'Login Not Successful', desc: 'Please Check Username or  Password'
-                            });
-                        }
-                    }
-                });
-            }
-            else {
-                res.send({
-                    'IsSuccess': false, 'msg': 'Login Unsuccessful', 'desc': 'Username and Password Should not be empty'
-                });
-            }
+                                  });
+                              }
+                           }
+                       });
 
+                   }
+               });
+           }
+           else
+           {
+               res.send({
+                   'IsSuccess': false, 'msg': 'Not Successful Login.....', 'desc': 'Please enter username and password'
+               });
+           }
         }
         connection.release();
     });
@@ -277,7 +309,7 @@ exports.logout = function (req, res) {
                             res.send({
                                 'IsSuccess': true, 'data': [], 'msg': 'Logout...'
                             });
-                            process.exit(0);
+                           
 
                         }
                     });
@@ -436,14 +468,17 @@ var fnDatabaseAddProduct=function(req,res){
        else {
            connection.query('SELECT user_id FROM temp WHERE token= ?', [req.body.token], function (err, result) {
 
-               //  console.log(JSON.stringify(result));
+
+               var dt = new Date();
+               var str = dt.toYMD();
+
                console.log(result[0].user_id);
                if (err) {
                    console.log('Connection error :', err);
                }
                else {
                    //  console.log('find User Id from here');
-                   connection.query('INSERT INTO product (pro_name,pro_desc,pro_image,pro_price,discount,createdt,createdby,flag,cat_id) VALUES (?,?,?,?,?,?,?,?,?)',[obj.pro_name,obj.pro_desc,obj.pro_image,obj.pro_price,obj.discount,obj.createdt,result[0].user_id,obj.flag,obj.cat_id],function(err,result){
+                   connection.query('INSERT INTO product (pro_name,pro_desc,pro_image,pro_price,discount,createdt,createdby,flag,cat_id) VALUES (?,?,?,?,?,?,?,?,?)',[obj.pro_name,obj.pro_desc,obj.pro_image,obj.pro_price,obj.discount,str,result[0].user_id,obj.flag,obj.cat_id],function(err,result){
                        if(err)
                        {
                            console.log('Connection error :', err);
@@ -538,7 +573,10 @@ var fnDatabaseAddCategory = function (req, res) {
                 }
                 else {
 
-                    connection.query('INSERT INTO category (cat_name,createdby,createdate,flag) values (?,?,?,?)', [obj.cat_name, result[0].user_id, obj.createdate, obj.flag], function (err, result) {
+                    var dt = new Date();
+                    var str = dt.toYMD();
+
+                    connection.query('INSERT INTO category (cat_name,createdby,createdate,flag) values (?,?,?,?)', [obj.cat_name, result[0].user_id,str, obj.flag], function (err, result) {
                         console.log(JSON.stringify(result));
                         if (err) {
                             console.log('Connection error :', err);
