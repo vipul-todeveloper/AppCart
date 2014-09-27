@@ -1,0 +1,20 @@
+<div class="centerDiv">
+    <h2>Admin Login</h2>
+    <form name="userForm" class="well" novalidate>
+
+        <!-- NAME -->
+        <div class="form-group">
+            <label>User Name:</label>
+            <input  placeholder="Enter User Name" class="form-control"  type="text" name="name" ng-model="uName" required/> <br>
+            <!--<span class="error"> {{ nameRequired }}</span>-->
+        </div>
+        <!-- EMAIL -->
+        <div class="form-group">
+            <label>Password:</label>
+            <input  placeholder="Enter Password" class="form-control"  type="password" name="email" ng-model="password" required/> <br>
+            <!--<span class="error" > {{ emailRequired }}</span> <span class="error"> {{ validEmailRequired }}</span>-->
+        </div>
+
+        <input type="button" value="Login"  ng-click="login()" class="btn btn-success btn-lg btn-block"/>
+    </form>
+</div>

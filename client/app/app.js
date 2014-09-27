@@ -1,13 +1,13 @@
 'use strict';
 
-angular.module('appShopApp', [
+var myApp = angular.module('appShopApp', [
   'ngCookies',
   'ngResource',
   'ngSanitize',
   'ngRoute',
   'ui.bootstrap'
-])
-  .config(function ($routeProvider, $locationProvider) {
+]);
+myApp.config(function ($routeProvider, $locationProvider) {
     $routeProvider
       .otherwise({
         redirectTo: '/'

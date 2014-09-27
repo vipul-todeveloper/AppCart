@@ -6,6 +6,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
     <base href="/">
     <title></title>
     <meta name="description" content="">
@@ -31,6 +32,52 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">My Store</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li ><a href="#home">Home</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#login" ng-hide = "logHide">Login</a></li>
+                    <li ng-hide = "! logHide"><a>Hello {{ userName }}...!</a></li>
+                    <li ng-hide = "! logHide"><a href="#logout"  >Logout</a></li>
+                    <!--<li class="dropdown">-->
+                        <!--<a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span class="caret"></span></a>-->
+                        <!--<ul class="dropdown-menu" role="menu">-->
+                            <!--<li><a href="#">Action</a></li>-->
+                            <!--<li><a href="#">Another action</a></li>-->
+                            <!--<li><a href="#">Something else here</a></li>-->
+                            <!--<li class="divider"></li>-->
+                            <!--<li><a href="#">Separated link</a></li>-->
+                        <!--</ul>-->
+                    <!--</li>-->
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="pull-left"style="width: 20%;" ng-hide = "! logHide">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <a href="#user" class="btn btn-success btn-lg btn-block">User </a>
+                <a href="#category" class="btn btn-success btn-lg btn-block">Category </a>
+                <a href="#product" class="btn btn-success btn-lg btn-block">Product </a>
+                <!--<a class="btn btn-success btn-lg btn-block">Order </a>-->
+            </div>
+        </div>
+    </div>
     <!-- Add your site or application content here -->
     <div ng-view=""></div>
 
@@ -52,7 +99,9 @@
     <!-- build:js({client,node_modules}) app/vendor.js -->
       <!-- bower:js -->
       <script src="../bower_components/jquery/dist/jquery.js"></script>
+      <script src="../bower_components/es5-shim/es5-shim.js"></script>
       <script src="../bower_components/angular/angular.js"></script>
+      <script src="../bower_components/json3/lib/json3.js"></script>
       <script src="../bower_components/angular-resource/angular-resource.js"></script>
       <script src="../bower_components/angular-cookies/angular-cookies.js"></script>
       <script src="../bower_components/angular-sanitize/angular-sanitize.js"></script>
@@ -63,10 +112,20 @@
     <!-- endbuild -->
 
         <!-- build:js({.tmp,client}) app/app.js -->
+
         <script src="app/app.js"></script>
+
+        <!-- injector:Services -->
+        <script src="app/services/admin.services.js"></script>
           <!-- injector:js -->
+          <script src="app/controller/category.controller.js"></script>
+          <script src="app/controller/login.controller.js"></script>
+          <script src="app/controller/logout.controller.js"></script>
+          <script src="app/controller/product.controller.js"></script>
+          <script src="app/controller/user.controller.js"></script>
           <script src="app/main/main.controller.js"></script>
           <script src="app/main/main.js"></script>
+          <script src="app/services/admin.services.js"></script>
           <script src="components/modal/modal.service.js"></script>
           <script src="components/navbar/navbar.controller.js"></script>
           <!-- endinjector -->

@@ -1,0 +1,48 @@
+<div class="centerDiv">
+    <h2>Product Form :</h2>
+    <form name="userForm" class="well" novalidate>
+        <!-- Product Name -->
+        <div class="form-group">
+            <label>Product Name:</label><span class="error"> {{ proNameRequired }}</span>
+            <input  placeholder="Enter Product Name" class="form-control"  type="text" name="proName" ng-model="proName" required/> <br>
+
+        </div>
+        <!-- Product detail -->
+        <div class="form-group">
+            <label>Product Description:</label><span class="error"> {{ proDetailRequired }}</span>
+            <textarea class="form-control" placeholder="Enter Product Description" name="proDetail" ng-model="proDetail" ></textarea><br>
+
+        </div>
+        <!-- Product images -->
+        <div class="form-group">
+            <label>Product image:</label><span class="error"> {{ proImageRequired }}</span>
+            <input type="file" multiple accept = image/* name="proImage" ng-model="proImage"  name="uploadField"/>
+
+        </div>
+        <!-- Product Price -->
+        <div class="form-group">
+            <label>Product Price :Rs.</label><span class="error"> {{ proPriceRequired }}</span>
+            <input  placeholder="Enter Product Price Rs." class="form-control"  type="text" name="proPrice" ng-model="proPrice" required/> <br>
+
+        </div>
+        <!-- Product Discount -->
+        <div class="form-group">
+            <label>Discount:</label><span class="error"> {{ proDiscountRequired }}</span>
+            <input  placeholder="Discount" class="form-control"  type="text" name="proDiscount" ng-model="proDiscount" required/> <br>
+
+        </div>
+        <!-- USERNAME -->
+        <div class="form-group">
+            <label>category:</label> <span class="error"> {{ catNameRequired }}</span>
+            <select class="form-control" name="catName" ng-model="catName">
+                <option>cat1</option>
+                <option>cat2</option>
+
+            </select>
+            <!--<span class="error"> {{ nameRequired }}</span>-->
+        </div>
+
+
+        <input type="button" value="Submit"  ng-click="insertProduct()" class="btn btn-success btn-lg btn-block"/>
+    </form>
+</div>

@@ -1,0 +1,32 @@
+<div class="centerUserDiv">
+    <h2>User Form :</h2>
+    <form name="userForm" class="well" novalidate>
+        <!-- NAME -->
+        <div class="form-group">
+            <label>Name:</label>  <span class="error"> {{ nameRequired }}</span>
+            <input  placeholder="Enter Name" class="form-control"  type="text" name="name" ng-model="fName" required/> <br>
+
+        </div>
+        <!-- USERNAME -->
+        <div class="form-group">
+            <label>User Name:</label> <span class="error"> {{ userRequired }}</span>
+            <input  placeholder="Enter User Name" class="form-control"  type="text" name="name" ng-model="uName" required/> <br>
+
+        </div>
+        <!-- PASSWORD -->
+        <div class="form-group">
+            <label>Password:</label> <span class="error" > {{ passwordRequired }}</span>
+            <input  placeholder="Enter Password" class="form-control"  type="password" name="password" ng-model="password" required/> <br>
+
+        </div>
+        <!-- EMAIL -->
+        <div class="form-group">
+            <label>Email ID:</label>  <span class="error"> {{ emailRequired }}</span>
+            <input  placeholder="Enter EmailID" class="form-control"  type="text" name="name" ng-model="email" required/> <br>
+
+        </div>
+
+
+        <input type="button" value="Submit"  ng-click="save()" class="btn btn-success btn-lg btn-block"/>
+    </form>
+</div>

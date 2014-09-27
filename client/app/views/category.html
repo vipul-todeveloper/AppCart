@@ -1,0 +1,23 @@
+
+<div class="centerDiv">
+    <h2>Add Category</h2>
+    <form name="userForm" class="well" novalidate>
+        <!-- NAME -->
+        <div class="form-group">
+            <label>Category:</label><span class="error"> {{ categoryRequired }}</span>
+            <input  placeholder="Enter Category" class="form-control"  type="text" name="Category" ng-model="Category" required/>
+        </div>
+        <div class="form-group">
+            <label>category:</label> <span class="error"> {{ activeRequired }}</span>
+            <select class="form-control" name="active" ng-model="active">
+                <option value=0 selected>Deactivate</option>
+                <option value=1 >Activate</option>
+
+            </select>
+            <!--<span class="error"> {{ nameRequired }}</span>-->
+        </div>
+
+
+        <input type="button" value="Add Category"  ng-click="addCat()" class="btn btn-success btn-lg btn-block"/>
+    </form>
+</div>
