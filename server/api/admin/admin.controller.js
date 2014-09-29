@@ -26,7 +26,7 @@ var connectionPool = mysql.createPool({
 });
 
 var manageSession = function (callback, req, res) {
-    var token = req.body.token;
+    var token = req.headers.token;
     console.log("Manage Session.....");
 
     connectionPool.getConnection(function (err, connection) {
@@ -34,7 +34,7 @@ var manageSession = function (callback, req, res) {
             console.log('Connection error:', err);
         }
         else {
-            console.log("Else part of Manage Session");
+
             connection.query('SELECT temp_id,period from temp WHERE token = ?', [token], function (err, result) {
                 console.log("JSON " + JSON.stringify(result));
 
@@ -43,7 +43,6 @@ var manageSession = function (callback, req, res) {
                     console.log('Connection error :', err);
                 }
                 else {
-                    console.log("Successful");
                     var sessionStartTime = result[0].period;
                     console.log("Session Start Time:==> " + sessionStartTime);
                     var a = sessionStartTime.split(':'); // split it at the colons
@@ -69,12 +68,9 @@ var manageSession = function (callback, req, res) {
                             }
                             else {
                                 console.log("Session Delete From temp table ");
-                                //process.exit(0);
                                 res.send({
                                     'IsSuccess': true, 'msg': 'Session Dead'
-
                                 });
-                                process.exit(0);
                             }
                         });
                     }
@@ -99,6 +95,7 @@ var manageSession = function (callback, req, res) {
         }
     });
 };
+
 (function() {
     Date.prototype.toYMD = Date_toYMD;
     function Date_toYMD() {
@@ -349,8 +346,6 @@ exports.updateProduct=function(req,res){
     console.log("Database Update Product");
 };
 
-
-
 exports.showCategory=function(req,res){
     console.log("Show Category......");
     manageSession(fnDataShowCategory, req, res);
@@ -363,13 +358,12 @@ exports.showOnCategory=function(req,res){
     console.log("Database Database Product");
 };
 
-
 var fnDatabaseUpdateCategory = function (req, res) {
     console.log("Update Category.....");
     var obj = req.body;
     console.log(req.body);
     var paramsData = req.params.id;
-    console.log(req.body.token);
+    console.log(req.headers.token);
     console.log(paramsData);
 
 
@@ -395,7 +389,7 @@ var fnDatabaseUpdateCategory = function (req, res) {
                 else {
                     console.log('Successfully Updated');
                     res.send({
-                        'IsSuccess': true, 'data': [], 'msg': 'Successfully Updated'
+                        'IsSuccess': true, 'data': [], 'msg': 'Updated Category Successfully'
                     });
                 }
                 connection.release();
@@ -493,7 +487,7 @@ var fnDatabaseAddProduct=function(req,res){
            });
        }
        else {
-           connection.query('SELECT user_id FROM temp WHERE token= ?', [req.body.token], function (err, result) {
+           connection.query('SELECT user_id FROM temp WHERE token= ?', [req.headers.token], function (err, result) {
 
 
                var dt = new Date();
@@ -519,7 +513,7 @@ var fnDatabaseAddProduct=function(req,res){
 
                            console.log('Successfully Inserted');
                            res.send({
-                               'IsSuccess': true, 'data': [], 'msg': 'Inserted successfully'
+                               'IsSuccess': true, 'data': [], 'msg': 'Product Inserted successfully'
                            });
                        }
                        connection.release();
@@ -568,9 +562,9 @@ var fnDatabaseUpdateProduct=function(req,res){
                    });
                }
                else {
-                   console.log('Successfully Updated');
+                   console.log('Successfully Updated Product');
                    res.send({
-                       'IsSuccess': true, 'data': [], 'msg': 'Successfully Updated'
+                       'IsSuccess': true, 'data': [], 'msg': 'Product Updated Successfully'
                    });
                }
 
@@ -586,13 +580,12 @@ var fnDatabaseAddCategory = function (req, res) {
     connectionPool.getConnection(function (err, connection) {
         if (err) {
             console.log('Connection error:', err);
-            res.statusCode = 503;
             res.send({
                 'IsSuccess': false, 'msg': err, 'desc': 'Connection Error' + err
             });
         }
         else {
-            connection.query('SELECT user_id FROM temp WHERE token= ?',[req.body.token],function(err,result){
+            connection.query('SELECT user_id FROM temp WHERE token= ?',[req.headers.token],function(err,result){
 
 
                 console.log(result[0].user_id);
@@ -671,7 +664,7 @@ var fnDatabaseProductStatus = function (req, res) {
                         connection.query('UPDATE product SET flag =? WHERE pro_id=?', [activate, req.params.id], function (err, result) {
                             if (err) {
                                 console.log('Connection error :', err);
-                                res.statusCode = 500;
+
                                 res.send({
                                     'IsSuccess': false, 'msg': err, desc: 'Database Error :==>' + err
                                 });
@@ -704,7 +697,7 @@ var fnDataShowCategory=function(req,res)
         }
         else
         {
-            connection.query('SELECT cat_id,cat_name,flag FROM category',function(err,rows,fields){
+            connection.query('SELECT cat_id,cat_name,flag FROM category',function(err,result){
                 if(err)
                 {
                     console.log('Connection error :', err);
@@ -712,45 +705,6 @@ var fnDataShowCategory=function(req,res)
                         'IsSuccess': false, 'msg': err, desc: 'Database Error :==>' + err
                     });
                 }
-                else
-                {
-                    var query="SELECT cat_id,cat_name,flag FROM category";
-                    console.log("Select query :==>"+query);
-                    res.send({
-                        result: 'success',
-                        json:   rows,
-                        length: rows.length
-                    });
-                }
-            });
-        }
-
-
-    });
-};
-
-exports.fnDataShowOnCategory=function(req,res){
-    console.log("fnDataShowOnCategory");
-    console.log("Show category...");
-    connectionPool.getConnection(function(err,connection){
-        if(err)
-        {
-            console.log('Connection error:', err);
-            res.statusCode = 503;
-            res.send({
-                'IsSuccess': false, 'msg': err, 'desc': 'Connection Error' + err
-            });
-        }
-        else
-        {
-
-            connection.query('SELECT cat_id,cat_name FROM category WHERE flag = 1 ' ,function(err,result){
-                if(err)
-                {
-                    console.log('Connection error :', err);
-                    res.send({
-                        'IsSuccess': false, 'msg': err, desc: 'Database Error :==>' + err
-                    });                }
                 else
                 {
                     var query="SELECT cat_id,cat_name,flag FROM category";
@@ -766,4 +720,42 @@ exports.fnDataShowOnCategory=function(req,res){
 
 
     });
+};
+
+var fnDataShowOnCategory=function(req,res){
+    console.log("fnDataShowOnCategory");
+    console.log("Show category...");
+    connectionPool.getConnection(function(err,connection){
+        if(err)
+        {
+            console.log('Connection error:', err);
+            res.statusCode = 503;
+            res.send({
+                'IsSuccess': false, 'msg': err, 'desc': 'Connection Error' + err
+            });
+        }
+        else {
+
+            connection.query('SELECT cat_id,cat_name FROM category WHERE flag = 1 ', function (err, result) {
+                if (err) {
+                    console.log('Connection error :', err);
+                    res.send({
+                        'IsSuccess': false, 'msg': err, desc: 'Database Error :==>' + err
+                    });
+                }
+                else {
+                    var query = "SELECT cat_id,cat_name,flag FROM category";
+                    console.log("Select query :==>" + query);
+                    res.send({
+                        'IsSuccess': true,
+                        json: result,
+                        length: result.length
+                    });
+                }
+            });
+        }
+    });
 }
+
+
+

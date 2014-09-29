@@ -18,5 +18,6 @@ router.post('/product', controller.addProduct);
 router.put('/updateproduct/:id', controller.updateProduct);
 router.put('/productStatus/:id', controller.productStatus);
 router.get('/showcategory', controller.showCategory);
-router.get('/showoncategory', controller.fnDataShowOnCategory)
+router.get('/showoncategory', controller.showOnCategory);
+
 module.exports = router;
